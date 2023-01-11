@@ -1,0 +1,29 @@
+<div class="d-flex align-items-center justify-content-between">
+  <h1 mat-dialog-title>Add Message</h1>
+  <button class="close" mat-button [mat-dialog-close]="true">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<form
+  action=""
+  [formGroup]="messageForm"
+  (ngSubmit)="onSubmit(messageForm.value)"
+>
+  <div mat-dialog-content>
+    <mat-form-field appearance="fill">
+      <input matInput formControlName="name" placeholder="Enter name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <textarea
+        matInput
+        formControlName="message"
+        placeholder="Enter message"
+      ></textarea>
+    </mat-form-field>
+
+    <div mat-dialog-actions>
+      <button mat-button [disabled]="!messageForm.valid">Submit</button>
+    </div>
+  </div>
+</form>
