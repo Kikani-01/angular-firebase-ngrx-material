@@ -14,9 +14,9 @@ import { Message } from '../models/message';
 export class MessageService {
   constructor(private fs: Firestore) {}
 
-  addMessage(message: Message) {
+  addMessage(message: Message): Observable<Message> {
     message.id = doc(collection(this.fs, 'id')).id;
-    return addDoc(collection(this.fs, 'messages'), message);
+    return addDoc(collection(this.fs, 'messages'), message) as any;
   }
 
   // get messages from the database
