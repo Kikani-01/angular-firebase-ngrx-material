@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core';
 import { createEffect, ofType, Actions } from '@ngrx/effects';
 import { of } from 'rxjs';
@@ -14,7 +15,6 @@ import {
 import { AppState } from 'src/app/app.state';
 import { Store } from '@ngrx/store';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { Message } from './user-messages.model';
 @Injectable()
 export class UserMessagesEffects {
@@ -22,8 +22,7 @@ export class UserMessagesEffects {
     private actions$: Actions,
     private fs: Firestore,
     private store: Store<AppState>,
-    private matSnackBar: MatSnackBar,
-    private spinner: NgxSpinnerService
+    private matSnackBar: MatSnackBar
   ) {}
 
   getMessages$ = createEffect(
@@ -31,7 +30,7 @@ export class UserMessagesEffects {
       this.actions$.pipe(
         ofType(actions.GET_MESSAGES),
         mergeMap(async () => {
-          let messageRef = collection(this.fs, 'messages');
+          const messageRef = collection(this.fs, 'messages');
           collectionData(messageRef, { idField: 'id' }).subscribe((res) => {
             this.store.dispatch(
               actions.getMessagesSuccess({ payload: res as Message[] })
@@ -59,7 +58,6 @@ export class UserMessagesEffects {
             if (res) {
               const data = res;
               this.store.dispatch(actions.AddMessageSuccess({ payload: data }));
-              this.spinner.hide();
               this.matSnackBar.open(` ${res['name']} added new message!`, '', {
                 duration: 5000,
               });

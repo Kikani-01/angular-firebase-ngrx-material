@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { createReducer, on } from '@ngrx/store';
 import { Message } from '../user-messages/user-messages.model';
@@ -46,7 +47,7 @@ export const messageReducer = createReducer(
     };
   }),
   // add new message
-  on(action.AddMessage, (state, action: any) => {
+  on(action.AddMessage, (state) => {
     return {
       ...state,
       loading: true,
