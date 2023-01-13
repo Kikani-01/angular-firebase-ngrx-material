@@ -4,11 +4,7 @@
     <mat-icon>close</mat-icon>
   </button>
 </div>
-<form
-  action=""
-  [formGroup]="messageForm"
-  (ngSubmit)="onSubmit(messageForm.value)"
->
+<form [formGroup]="messageForm" (ngSubmit)="onSubmit(messageForm.value)">
   <div mat-dialog-content>
     <mat-form-field appearance="fill">
       <input matInput formControlName="name" placeholder="Enter name" />

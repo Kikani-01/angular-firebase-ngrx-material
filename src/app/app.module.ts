@@ -9,7 +9,7 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { environment } from 'src/environments/environments';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { EffectsModule } from '@ngrx/effects';
-import { userReducer } from './store/user-messages/user-messages.reducer';
+import { reducers } from './root.reducer';
 
 @NgModule({
   declarations: [AppComponent],
@@ -19,7 +19,7 @@ import { userReducer } from './store/user-messages/user-messages.reducer';
     AppRoutingModule,
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideFirestore(() => getFirestore()),
-    StoreModule.forRoot(userReducer),
+    StoreModule.forRoot(reducers),
     EffectsModule.forRoot([]),
     StoreDevtoolsModule.instrument({
       maxAge: 25,

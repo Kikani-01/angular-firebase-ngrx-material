@@ -1,43 +1,72 @@
 import { Injectable } from '@angular/core';
 import { createEffect, ofType, Actions } from '@ngrx/effects';
 import { of } from 'rxjs';
-import * as userActions from './user-messages.action';
-import { mergeMap, map, catchError, tap } from 'rxjs/operators';
-import { MessageService } from 'src/app/_services/message.service';
-
+import * as actions from './user-messages.action';
+import { mergeMap, map, catchError, take } from 'rxjs/operators';
+import {
+  addDoc,
+  collection,
+  collectionData,
+  doc,
+  docData,
+  Firestore,
+} from '@angular/fire/firestore';
+import { AppState } from 'src/app/app.state';
+import { Store } from '@ngrx/store';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { Message } from './user-messages.model';
 @Injectable()
-export class UserEffects {
-  constructor(private actions$: Actions, private ms: MessageService) {}
+export class UserMessagesEffects {
+  constructor(
+    private actions$: Actions,
+    private fs: Firestore,
+    private store: Store<AppState>,
+    private matSnackBar: MatSnackBar,
+    private spinner: NgxSpinnerService
+  ) {}
 
-  getUsers$ = createEffect(
+  getMessages$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(userActions.GET_USER),
-        mergeMap(
-          (res) =>
-            this.ms
-              .getMessages()
-              .pipe(tap((res) => console.log('Data loaded', res))),
-          map(
-            (res: any) => userActions.getUserSuccess(res),
-            catchError((err) => of(userActions.getUserFail(err.error)))
-          )
-        )
+        ofType(actions.GET_MESSAGES),
+        mergeMap(async () => {
+          let messageRef = collection(this.fs, 'messages');
+          collectionData(messageRef, { idField: 'id' }).subscribe((res) => {
+            this.store.dispatch(
+              actions.getMessagesSuccess({ payload: res as Message[] })
+            );
+          });
+        }, map(catchError((err) => of(actions.getMessagesFail(err.error)))))
       ),
     { dispatch: false }
   );
 
-  addUser = createEffect(
+  addMessage$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(userActions.ADD_USER),
-        mergeMap((action: any) =>
-          this.ms.addMessage(action.payload).pipe(
-            tap((res) => console.log(res)),
-            map((res: any) => userActions.AddUserSuccess(res)),
-            catchError((err) => of(userActions.AddUserFail(err.error)))
-          )
-        )
+        ofType(actions.ADD_MESSAGE),
+        mergeMap(async (action: any) => {
+          const data = addDoc(collection(this.fs, 'messages'), action.payload);
+          let id;
+          await data.then((response) => {
+            id = response.id;
+          });
+          const getData = await docData(doc(this.fs, `messages/${id}`), {
+            idField: 'id',
+          });
+          getData.pipe(take(1)).subscribe((res) => {
+            if (res) {
+              const data = res;
+              this.store.dispatch(actions.AddMessageSuccess({ payload: data }));
+              this.spinner.hide();
+              this.matSnackBar.open(` ${res['name']} added new message!`, '', {
+                duration: 5000,
+              });
+            }
+          });
+          catchError((err) => of(actions.AddMessageFail(err.error)));
+        })
       ),
     { dispatch: false }
   );
